@@ -23,13 +23,28 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const serviceCollection = client.db('teacher').collection('services');
+        const commentCollection = client.db('teacher').collection('comments');
 
         app.post('/services', async (req, res) => {
             const service = req.body;
             const result = await serviceCollection.insertOne(service);
             res.send(result)
         });
+        app.post('/comment', async (req, res) => {
+            const comment = req.body;
+            const addComment = await commentCollection.insertOne(comment);
+            res.send(addComment)
+        });
 
+        app.get('/comment', async (req, res) => {
+            let query = {};
+            if (req.query.email) {
+                query = { email: req.query.email }
+            }
+            const cursor = commentCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews)
+        });
         app.get('/services', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query);
